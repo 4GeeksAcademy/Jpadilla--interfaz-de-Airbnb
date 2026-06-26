@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffaf2;
+  --foreground: #1e2430;
+  --surface: #ffffff;
+  --surface-soft: #fff4e5;
+  --accent: #ff5a5f;
+  --accent-strong: #e23f45;
+  --ring-soft: rgba(255, 90, 95, 0.22);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #fffaf2;
+    --foreground: #1e2430;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(40% 30% at 10% 0%, rgba(255, 168, 107, 0.25), transparent 70%),
+    radial-gradient(30% 35% at 100% 10%, rgba(255, 90, 95, 0.2), transparent 70%),
+    linear-gradient(180deg, #fff9f0 0%, #fffefc 45%, #fff7ec 100%);
+}
+
+.font-display {
+  font-family: var(--font-playfair), "Times New Roman", serif;
+}
+
+.soft-panel {
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.9), rgba(255, 244, 229, 0.9));
+  border: 1px solid rgba(255, 160, 120, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.focus-soft {
+  transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.focus-soft:focus,
+.focus-soft:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--ring-soft);
 }
