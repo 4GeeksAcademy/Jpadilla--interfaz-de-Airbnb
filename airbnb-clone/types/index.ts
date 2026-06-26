@@ -15,6 +15,8 @@ export interface Alojamiento {
   titulo: string;
   categoria: string;
   placeholderFoto: string;
+  latitud: number;
+  longitud: number;
   fotos: string[];
   precioPorNoche: number;
   valoracionEstrellas: number;

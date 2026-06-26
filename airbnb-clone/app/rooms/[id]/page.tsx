@@ -1,25 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { mockAlojamientos } from '@/types/mockData';
 import { Alojamiento } from '@/types';
 
-export default function RoomDetailPage() {
-  const { id } = useParams();
+interface RoomPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function RoomDetailPage({ params }: RoomPageProps) {
+  // Desenvuelve los parámetros dinámicos de forma segura (Next.js 15/16 + TypeScript)
+  const resolvedParams = use(params);
+  const id = resolvedParams.id;
+
   const [alojamiento, setAlojamiento] = useState<Alojamiento | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
   const [currentFotoIndex, setCurrentFotoIndex] = useState(0);
   const [huespedes, setHuespedes] = useState(1);
 
+  const isLoading = loadedId !== id;
+
   useEffect(() => {
-    setIsLoading(true);
     const timer = setTimeout(() => {
       const encontrado = mockAlojamientos.find((item) => item.id === id);
       setAlojamiento(encontrado || null);
-      setIsLoading(false);
-    }, 800); // Simulación de carga obligatoria
+      setLoadedId(id);
+    }, 800); // Simulación de carga asíncrona obligatoria
     return () => clearTimeout(timer);
   }, [id]);
 
@@ -41,7 +48,6 @@ export default function RoomDetailPage() {
     );
   }
 
-  // Funciones de navegación de la galería de fotos
   const siguienteFoto = () => {
     setCurrentFotoIndex((prev) => (prev + 1) % alojamiento.fotos.length);
   };
@@ -52,7 +58,7 @@ export default function RoomDetailPage() {
 
   return (
     <div className="min-h-screen bg-white pb-16">
-      {/* Botón superior de regreso seguro (Rúbrica: Evitar enlaces planos <a>) */}
+      {/* Botón superior de regreso SPA */}
       <div className="max-w-4xl mx-auto px-4 pt-6">
         <Link href="/catalog" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-rose-500 transition-colors">
           ⬅️ Volver al Catálogo
@@ -60,8 +66,8 @@ export default function RoomDetailPage() {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 mt-4 space-y-6">
-        {/* 1. Galería de fotos interactiva con botones Anterior/Siguiente */}
-        <section className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-gray-100 group shadow-sm">
+        {/* Galería de fotos interactiva con botones */}
+        <section className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
           <img
             src={alojamiento.fotos[currentFotoIndex]}
             alt={`Foto ${currentFotoIndex + 1}`}
@@ -82,11 +88,9 @@ export default function RoomDetailPage() {
           )}
         </section>
 
-        {/* Estructura dividida: Información vs Tarjeta de Reserva */}
+        {/* Distribución de Información vs Reserva */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
-          {/* Detalles e Info del Anfitrión */}
           <div className="md:col-span-2 space-y-6">
-            {/* 2. Cabecera del alojamiento */}
             <div>
               <h1 className="text-2xl font-bold text-gray-950">{alojamiento.titulo}</h1>
               <div className="flex items-center gap-2 mt-2 text-sm text-gray-600 font-medium">
@@ -100,7 +104,7 @@ export default function RoomDetailPage() {
 
             <hr className="border-gray-100" />
 
-            {/* 3. Fila de información del anfitrión */}
+            {/* Fila del Anfitrión */}
             <div className="flex items-center gap-4">
               <img
                 src={alojamiento.anfitrion.avatarUrl}
@@ -109,19 +113,18 @@ export default function RoomDetailPage() {
               />
               <div>
                 <h3 className="font-semibold text-gray-900">Anfitrión: {alojamiento.anfitrion.nombre}</h3>
-                <p className="text-xs text-gray-500">{alojamiento.anfitrion.aniosComoAnfitrion} años ofreciendo experiencias en la plataforma</p>
+                <p className="text-xs text-gray-500">{alojamiento.anfitrion.aniosComoAnfitrion} años ofreciendo experiencias</p>
               </div>
             </div>
 
             <hr className="border-gray-100" />
 
-            {/* Descripción */}
             <div>
               <h3 className="font-bold text-gray-900 mb-2">Acerca del lugar</h3>
               <p className="text-gray-600 text-sm leading-relaxed">{alojamiento.descripcion}</p>
             </div>
 
-            {/* 4. Sección de servicios (amenities) */}
+            {/* Listado de Servicios */}
             <div>
               <h3 className="font-bold text-gray-900 mb-3">Lo que este lugar ofrece</h3>
               <div className="grid grid-cols-2 gap-3">
@@ -135,7 +138,7 @@ export default function RoomDetailPage() {
             </div>
           </div>
 
-          {/* 5. Tarjeta de Reserva con control estricto de rango mínimo/máximo */}
+          {/* Tarjeta de Reserva con control de rango mínimo (1) y máximo (6) */}
           <div className="h-fit border border-gray-200 rounded-2xl p-6 shadow-lg bg-white space-y-4">
             <div className="flex items-baseline justify-between">
               <span className="text-xl font-bold text-gray-950">${alojamiento.precioPorNoche} USD</span>
